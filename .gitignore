@@ -12,3 +12,6 @@ data_*/
 
 # Godot 4+ specific ignores
 .godot/
+
+# Npm ignores
+node_modules/
