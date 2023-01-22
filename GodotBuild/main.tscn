@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://c7riebmms6uja"]
+
+[ext_resource type="Script" path="res://ComputeOutput.gd" id="1_0evnw"]
+
+[node name="main" type="Node2D"]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+unique_name_in_owner = true
+
+[node name="ComputeOutput" type="TextureRect" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_0evnw")
