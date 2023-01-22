@@ -2,7 +2,7 @@
   "name": "fluxvisualization",
   "version": "0.1.0",
   "description": "a project designed to allow users to visualize electric flux in a 2d plane",
-  "main": "main.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
