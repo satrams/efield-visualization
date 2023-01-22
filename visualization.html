@@ -2,30 +2,34 @@
 <html lang="en">
 
 <body style="background-color:#000000">
-    <canvas id="myCanvas" width="500" height="500" style="border:1px solid #000000"></canvas>
-    <div>
+    <canvas id="myCanvas" width="500" height="500" style="border:1px solid aliceblue"></canvas>
+    <div style="color:aliceblue">
         <input type="radio" id="electron" name="object" value="electron">
         <label for="electron">electron</label>
         <input type="radio" id="proton" name="object" value="proton">
         <label for="proton">proton</label>
+        <input type="radio" id="sensor" name="object" value="sensor">
+        <label for="sensor">sensor</label>
+    </div>
+    <div style="color:aliceblue">
+        <label for="fluxScale">fluxScale</label>
+        <input type="range" min="50000" max="2000000" value="500000" id="fluxScale">
+        <button onclick="setScale()">submit</button>
     </div>
 </body>
 
 
 <script>
-    const fluxScale = 500000;
+    var fluxScale = document.getElementById("fluxScale").value;
+    var startTime, endTime;
     var c = document.getElementById("myCanvas");
     const electronImage = new Image();
     electronImage.src = "electron.png";
     const protonImage = new Image();
     protonImage.src = "proton.png";
 
-    var electrons = [
-        [75, 75],
-    ];
-    var protons = [
-        [120, 120],
-    ];
+    var electrons = [];
+    var protons = [];
 
     const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
@@ -64,26 +68,25 @@
             for (var x = 0; x < 500; x++) {
                 var fieldVec = [0, 0];
 
-                for (var proton in protons) {
-                    const distx = x - protons[proton][0];
-                    const disty = y - protons[proton][1];
+                protons.forEach(proton => {
+                    const distx = x - proton[0];
+                    const disty = y - proton[1];
                     const dist = Math.sqrt(distx * distx + disty * disty);
                     const strength = 1 / (dist * dist);
 
                     fieldVec[0] += strength * (distx / dist);
                     fieldVec[1] += strength * (disty / dist);
-                }
+                });
 
-                for (var electron in electrons) {
-                    const distx = x - electrons[electron][0];
-                    const disty = y - electrons[electron][1];
+                electrons.forEach(electron => {
+                    const distx = x - electron[0];
+                    const disty = y - electron[1];
                     const dist = Math.sqrt(distx * distx + disty * disty);
                     const strength = 1 / (dist * dist);
 
                     fieldVec[0] -= strength * (distx / dist);
                     fieldVec[1] -= strength * (disty / dist);
-
-                }
+                });
 
                 const finalDirection = Math.atan2(fieldVec[1], fieldVec[0]);
                 const finalStrength = Math.sqrt(fieldVec[0] * fieldVec[0] + fieldVec[1] * fieldVec[1]);
@@ -108,12 +111,40 @@
 
 
     c.addEventListener("click", function (e) {
-        var x = e.pageX - c.offsetLeft;
-        var y = e.pageY - c.offsetTop;
 
-        electrons[electrons.length] = [x, y];
-        drawFlux();
+
+
+        //get which object is currently selected to place
+        var options = document.getElementsByName('object');
+        var selected;
+        for (var i = 0; i < options.length; i++) {
+            if (options[i].checked) {
+                selected = options[i].value;
+            }
+        }
+
+        if (selected == "electron") {
+            var x = e.pageX - c.offsetLeft;
+            var y = e.pageY - c.offsetTop;
+
+            electrons[electrons.length] = [x, y];
+            drawFlux();
+        }
+        else if (selected == "proton") {
+            var x = e.pageX - c.offsetLeft;
+            var y = e.pageY - c.offsetTop;
+
+            protons[protons.length] = [x, y];
+            drawFlux();
+        }
+
     });
+
+
+    function setScale() {
+        fluxScale = document.getElementById("fluxScale").value;
+        drawFlux();
+    }
 
 </script>
 
