@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://bvjweorwobjth"
+path="res://.godot/imported/fluxcalculation.glsl-3f07158ff4e76032f6b0517a456c501b.res"
+
+[deps]
+
+source_file="res://fluxcalculation.glsl"
+dest_files=["res://.godot/imported/fluxcalculation.glsl-3f07158ff4e76032f6b0517a456c501b.res"]
+
+[params]
+

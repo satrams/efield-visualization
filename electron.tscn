@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://1lgajekpjj5i"]
+
+[ext_resource type="Script" path="res://electron.gd" id="1_k4ehv"]
+
+[node name="electron" type="Node2D"]
+script = ExtResource("1_k4ehv")
