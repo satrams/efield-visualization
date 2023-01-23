@@ -2,7 +2,11 @@
 <html lang="en">
 
 <body style="background-color:#000000">
-    <canvas id="myCanvas" width="500" height="500" style="border:1px solid aliceblue"></canvas>
+    <div id="canvasContainer">
+        <canvas id="subatomCanvas" width="500" height="500" style="position:absolute; top: 8px; left: 8px; border:1px solid aliceblue"></canvas>
+        <canvas id="sensorCanvas" width="500" height="500" style="position:absolute; top: 8px; left: 8px; border:1px solid aliceblue"></canvas>
+        <canvas id="fluxCanvas" width="500" height="500" style="border:1px solid aliceblue"></canvas>
+    </div>
     <div style="color:aliceblue">
         <input type="radio" id="electron" name="object" value="electron">
         <label for="electron">electron</label>
@@ -20,8 +24,10 @@
 
 <script>
     var fluxScale = document.getElementById("fluxScale").value;
-    var startTime, endTime;
-    var c = document.getElementById("myCanvas");
+    var fieldCanvas = document.getElementById("fluxCanvas");
+    var subatomCanvas = document.getElementById("subatomCanvas");
+    var sensorCanvas = document.getElementById("sensorCanvas");
+
 
     const electronImage = new Image();
     const electronCanvas = new OffscreenCanvas(50, 50);
@@ -41,12 +47,22 @@
 
     const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
-    const scale = (number, [inMin, inMax], [outMin, outMax]) => {
+    const scale = (number, inMin, inMax, outMin, outMax) => {
         // if you need an integer value use Math.floor or Math.ceil here
         return (number - inMin) / (inMax - inMin) * (outMax - outMin) + outMin;
     }
 
-    function drawSubatoms(ctx) {
+    function drawSubatoms() {
+
+        if (!subatomCanvas.getContext) {
+            console.error("canvas context not supported in this browser!");
+            return;
+        }
+
+        const ctx = subatomCanvas.getContext("2d");
+
+        ctx.clearRect(0,0,500,500);
+
         electrons.forEach(electron => {
             //console.log(electrons[electron]);
             ctx.drawImage(electronCanvas, electron[0] - 25, electron[1] - 25);
@@ -57,7 +73,17 @@
         });
     }
 
-    function drawSensors(ctx) {
+    function drawSensors() {
+
+        if (!sensorCanvas.getContext) {
+            console.error("canvas context not supported in this browser!");
+            return;
+        }
+
+        const ctx = sensorCanvas.getContext("2d");
+
+        ctx.clearRect(0,0,500,500);
+
         sensors.forEach(sensor => {
             ctx.beginPath();
             ctx.arc(sensor[0], sensor[1], 8, 0, 2 * Math.PI);
@@ -99,17 +125,17 @@
     }
 
     function drawFlux() {
-        if (!c.getContext) {
+        if (!fieldCanvas.getContext) {
             alert("html5 is not supported in this web browser!");
             return;
         }
-        var ctx = c.getContext("2d");
+        var ctx = fieldCanvas.getContext("2d");
 
         let pixels = new ImageData(500, 500);
+        var fieldVec;
         for (var y = 0; y < 500; y++) {
             for (var x = 0; x < 500; x++) {
-                var fieldVec = [0, 0];
-
+                fieldVec = [0,0];
                 protons.forEach(proton => {
                     const distx = x - proton[0];
                     const disty = y - proton[1];
@@ -134,8 +160,8 @@
                 const finalStrength = Math.sqrt(fieldVec[0] * fieldVec[0] + fieldVec[1] * fieldVec[1]);
 
                 const ptr = (x + y * 500) * 4;
-                pixels.data[ptr] = scale(fieldVec[0] / finalStrength, [-1, 1], [0, 255]); //r
-                pixels.data[ptr + 1] = scale(fieldVec[1] / finalStrength, [-1, 1], [0, 255]); //g
+                pixels.data[ptr] = scale(fieldVec[0] / finalStrength, -1, 1, 0, 255); //r
+                pixels.data[ptr + 1] = scale(fieldVec[1] / finalStrength, -1, 1, 0, 255); //g
                 pixels.data[ptr + 2] = 255; //b
                 pixels.data[ptr + 3] = finalStrength * fluxScale; //a
 
@@ -143,15 +169,16 @@
         }
 
         ctx.putImageData(pixels, 0, 0);
-
-        drawSubatoms(ctx);
-        drawSensors(ctx);
     }
 
-    drawFlux();
+    function render() {
+        drawSubatoms();
+        drawSensors();
+        drawFlux();
+    }
 
 
-    c.addEventListener("click", function (e) {
+    document.getElementById("canvasContainer").addEventListener("click", function (e) {
 
 
 
@@ -164,22 +191,22 @@
             }
         }
 
-        var x = e.pageX - c.offsetLeft;
-        var y = e.pageY - c.offsetTop;
+        var x = e.pageX - fieldCanvas.offsetLeft;
+        var y = e.pageY - fieldCanvas.offsetTop;
         if (selected == "electron") {
 
             electrons[electrons.length] = [x, y];
-            drawFlux();
+            window.requestAnimationFrame(render);
         }
         else if (selected == "proton") {
 
             protons[protons.length] = [x, y];
-            drawFlux();
+            window.requestAnimationFrame(render);
         }
         else if (selected == "sensor") {
 
             sensors[sensors.length] = [x, y];
-            drawFlux();
+            window.requestAnimationFrame(drawSensors);
         }
 
     });
