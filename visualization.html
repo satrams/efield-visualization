@@ -28,6 +28,13 @@
     const protonImage = new Image();
     protonImage.src = "proton.png";
 
+
+    const electronCanvas = new OffscreenCanvas(50, 50);
+    electronCanvas.getContext('2d').drawImage(electronImage, 0, 0, 50, 50);
+
+    const protonCanvas = new OffscreenCanvas(50, 50);
+    protonCanvas.getContext('2d').drawImage(protonImage, 0, 0, 50, 50);
+
     var electrons = [];
     var protons = [];
 
@@ -48,11 +55,11 @@
     function drawSubatoms(ctx) {
         for (var electron in electrons) {
             //console.log(electrons[electron]);
-            ctx.drawImage(electronImage, electrons[electron][0] - 25, electrons[electron][1] - 25, 50, 50);
+            ctx.drawImage(electronCanvas, electrons[electron][0] - 25, electrons[electron][1] - 25);
         }
         for (var proton in protons) {
             //console.log(protons[proton]);
-            ctx.drawImage(protonImage, protons[proton][0] - 25, protons[proton][1] - 25, 50, 50);
+            ctx.drawImage(protonCanvas, protons[proton][0] - 25, protons[proton][1] - 25);
         }
     }
 
@@ -63,7 +70,7 @@
         }
         var ctx = c.getContext("2d");
 
-        var data = new Uint8ClampedArray(500 * 500 * 4);
+        let pixels = new ImageData(500, 500);
         for (var y = 0; y < 500; y++) {
             for (var x = 0; x < 500; x++) {
                 var fieldVec = [0, 0];
@@ -91,18 +98,16 @@
                 const finalDirection = Math.atan2(fieldVec[1], fieldVec[0]);
                 const finalStrength = Math.sqrt(fieldVec[0] * fieldVec[0] + fieldVec[1] * fieldVec[1]);
 
-                data[((x + (y * 500)) * 4) + 0] = scale(fieldVec[0] / finalStrength, [-1, 1], [0, 255]);
-                data[((x + (y * 500)) * 4) + 1] = scale(fieldVec[1] / finalStrength, [-1, 1], [0, 255]);
-                data[((x + (y * 500)) * 4) + 2] = 255;
-
-                for (var i = 0; i < 3; i++) {
-                    data[((x + (y * 500)) * 4) + 3] = finalStrength * fluxScale;
-                }
+                const ptr = (x + y * 500) * 4;
+                pixels.data[ptr] = scale(fieldVec[0] / finalStrength, [-1, 1], [0, 255]); //r
+                pixels.data[ptr + 1] = scale(fieldVec[1] / finalStrength, [-1, 1], [0, 255]); //g
+                pixels.data[ptr + 2] = 255; //b
+                pixels.data[ptr + 3] = finalStrength * fluxScale; //a
 
             }
         }
 
-        ctx.putImageData(new ImageData(data, 500), 0, 0);
+        ctx.putImageData(pixels, 0, 0);
 
         drawSubatoms(ctx);
     }
