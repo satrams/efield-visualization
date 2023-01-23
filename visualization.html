@@ -23,17 +23,16 @@
     var fluxScale = document.getElementById("fluxScale").value;
     var startTime, endTime;
     var c = document.getElementById("myCanvas");
+
     const electronImage = new Image();
-    electronImage.src = "electron.png";
-    const protonImage = new Image();
-    protonImage.src = "proton.png";
-
-
     const electronCanvas = new OffscreenCanvas(50, 50);
-    electronCanvas.getContext('2d').drawImage(electronImage, 0, 0, 50, 50);
+    electronImage.onload = function () { electronCanvas.getContext('2d').drawImage(electronImage, 0, 0, 50, 50); };
+    electronImage.src = "electron.png";
 
+    const protonImage = new Image();
     const protonCanvas = new OffscreenCanvas(50, 50);
-    protonCanvas.getContext('2d').drawImage(protonImage, 0, 0, 50, 50);
+    protonImage.onload = function () { protonCanvas.getContext('2d').drawImage(protonImage, 0, 0, 50, 50); };
+    protonImage.src = "proton.png";
 
     var electrons = [];
     var protons = [];
@@ -43,13 +42,6 @@
     const scale = (number, [inMin, inMax], [outMin, outMax]) => {
         // if you need an integer value use Math.floor or Math.ceil here
         return (number - inMin) / (inMax - inMin) * (outMax - outMin) + outMin;
-    }
-
-    function onlyOne(checkbox) {
-        var checkboxes = document.getElementsByName('check')
-        checkboxes.forEach((item) => {
-            if (item !== checkbox) item.checked = false
-        })
     }
 
     function drawSubatoms(ctx) {
