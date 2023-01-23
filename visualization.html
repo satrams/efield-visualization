@@ -47,11 +47,11 @@
     function drawSubatoms(ctx) {
         electrons.forEach(electron => {
             //console.log(electrons[electron]);
-            ctx.drawImage(electronCanvas, electrons[electron][0] - 25, electrons[electron][1] - 25);
+            ctx.drawImage(electronCanvas, electron[0] - 25, electron[1] - 25);
         });
         protons.forEach(proton => {
             //console.log(protons[proton]);
-            ctx.drawImage(protonCanvas, protons[proton][0] - 25, protons[proton][1] - 25);
+            ctx.drawImage(protonCanvas, proton[0] - 25, proton[1] - 25);
         });
     }
 
