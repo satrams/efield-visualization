@@ -35,6 +35,7 @@
 
     var electrons = [];
     var protons = [];
+    var sensors = [];
 
     const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
@@ -44,14 +45,18 @@
     }
 
     function drawSubatoms(ctx) {
-        for (var electron in electrons) {
+        electrons.forEach(electron => {
             //console.log(electrons[electron]);
             ctx.drawImage(electronCanvas, electrons[electron][0] - 25, electrons[electron][1] - 25);
-        }
-        for (var proton in protons) {
+        });
+        protons.forEach(proton => {
             //console.log(protons[proton]);
             ctx.drawImage(protonCanvas, protons[proton][0] - 25, protons[proton][1] - 25);
-        }
+        });
+    }
+
+    function drawSensors(ctx) {
+
     }
 
     function drawFlux() {
@@ -101,6 +106,7 @@
         ctx.putImageData(pixels, 0, 0);
 
         drawSubatoms(ctx);
+        drawSensors(ctx);
     }
 
     drawFlux();
@@ -119,19 +125,21 @@
             }
         }
 
+        var x = e.pageX - c.offsetLeft;
+        var y = e.pageY - c.offsetTop;
         if (selected == "electron") {
-            var x = e.pageX - c.offsetLeft;
-            var y = e.pageY - c.offsetTop;
 
             electrons[electrons.length] = [x, y];
             drawFlux();
         }
         else if (selected == "proton") {
-            var x = e.pageX - c.offsetLeft;
-            var y = e.pageY - c.offsetTop;
 
             protons[protons.length] = [x, y];
             drawFlux();
+        }
+        else if (selected == "sensor") {
+
+
         }
 
     });
