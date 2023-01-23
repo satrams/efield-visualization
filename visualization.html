@@ -33,6 +33,8 @@
     protonImage.onload = function () { protonCanvas.getContext('2d').drawImage(protonImage, 0, 0, 50, 50); };
     protonImage.src = "proton.png";
 
+    const sensorScale = 100000;
+
     var electrons = [];
     var protons = [];
     var sensors = [];
@@ -56,7 +58,44 @@
     }
 
     function drawSensors(ctx) {
+        sensors.forEach(sensor => {
+            ctx.beginPath();
+            ctx.arc(sensor[0], sensor[1], 8, 0, 2 * Math.PI);
+            ctx.fillStyle = "#eda655";
+            ctx.fill();
 
+            var fieldVec = [0, 0];
+
+            protons.forEach(proton => {
+                const distx = sensor[0] - proton[0];
+                const disty = sensor[1] - proton[1];
+                const dist = Math.sqrt(distx * distx + disty * disty);
+                const strength = 1 / (dist * dist);
+
+                fieldVec[0] += strength * (distx / dist);
+                fieldVec[1] += strength * (disty / dist);
+            });
+
+            electrons.forEach(electron => {
+                const distx = sensor[0] - electron[0];
+                const disty = sensor[1] - electron[1];
+                const dist = Math.sqrt(distx * distx + disty * disty);
+                const strength = 1 / (dist * dist);
+
+                fieldVec[0] -= strength * (distx / dist);
+                fieldVec[1] -= strength * (disty / dist);
+            });
+
+
+            fieldVec[0] *= sensorScale;
+            fieldVec[1] *= sensorScale;
+            ctx.beginPath();
+            ctx.moveTo(sensor[0], sensor[1]);
+            ctx.lineTo(sensor[0] + (fieldVec[0] | 0), sensor[1] + (fieldVec[1]) | 0);
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 5;
+            ctx.stroke();
+        })
     }
 
     function drawFlux() {
@@ -139,7 +178,8 @@
         }
         else if (selected == "sensor") {
 
-
+            sensors[sensors.length] = [x, y];
+            drawFlux();
         }
 
     });
