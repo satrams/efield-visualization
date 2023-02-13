@@ -155,8 +155,7 @@
                     fieldVec[0] -= strength * (distx / dist);
                     fieldVec[1] -= strength * (disty / dist);
                 });
-
-                const finalDirection = Math.atan2(fieldVec[1], fieldVec[0]);
+                
                 const finalStrength = Math.sqrt(fieldVec[0] * fieldVec[0] + fieldVec[1] * fieldVec[1]);
 
                 const ptr = (x + y * 500) * 4;
