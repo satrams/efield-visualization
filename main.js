@@ -239,6 +239,12 @@ canvasContainer.addEventListener("mouseup", function (e) {
 });
 
 
+canvasContainer.addEventListener("mouseleave", function (e) {
+    hovering.grabbing = false;
+    hovering.object = "none";
+    hovering.index = -1;
+});
+
 canvasContainer.addEventListener("mousemove", function (e) {
     var x = e.offsetX;
     var y = 500 - e.offsetY;
