@@ -1,4 +1,5 @@
 const MAX_SUBATOMS = 16;
+const sensorScale = 200000;
 
 const vertexShaderSource = `#version 300 es
 #pragma vscode_glsllint_stage: vert
@@ -121,6 +122,8 @@ var protons = new Float32Array(MAX_SUBATOMS * 2);
 var protonsLength = 0;
 var electrons = new Float32Array(MAX_SUBATOMS * 2);
 var electronsLength = 0;
+var sensors = new Float32Array(MAX_SUBATOMS * 2);
+var sensorsLength = 0;
 
 
 
@@ -138,13 +141,14 @@ protonImage.src = "proton.png";
 
 const canvasContainer = document.getElementById("canvasContainer");
 const subatomCanvas = document.getElementById("subatomCanvas");
+const sensorCanvas = document.getElementById("sensorCanvas");
 
 if (!subatomCanvas.getContext) {
     alert("canvas context not supported in this browser!");
 }
 
 const ctx = subatomCanvas.getContext("2d");
-
+const sctx = sensorCanvas.getContext("2d");
 
 function drawSubatoms() {
 
@@ -162,6 +166,54 @@ function drawSubatoms() {
     }
 }
 
+function drawSensors() {
+
+    sctx.clearRect(0, 0, 500, 500);
+    console.log("eeeee");
+
+    for (var u = 0; u < sensorsLength; u++) {
+        const sensor = [sensors[u * 2], sensors[u * 2 + 1]];
+        sctx.beginPath();
+        sctx.arc(sensor[0], 500 - sensor[1], 8, 0, 2 * Math.PI);
+        sctx.fillStyle = "#eda655";
+        sctx.fill();
+
+        var fieldVec = [0, 0];
+
+        for (var i = 0; i < protonsLength; i++) {
+            const proton = [protons[i * 2], protons[i * 2 + 1]];
+            const distx = sensor[0] - proton[0];
+            const disty = sensor[1] - proton[1];
+            const dist = Math.sqrt(distx * distx + disty * disty);
+            const strength = 1 / (dist * dist);
+
+            fieldVec[0] -= strength * (distx / dist);
+            fieldVec[1] += strength * (disty / dist);
+        };
+
+        for (var i = 0; i < electronsLength; i++) {
+            const electron = [electrons[i * 2], electrons[i * 2 + 1]];
+            const distx = sensor[0] - electron[0];
+            const disty = sensor[1] - electron[1];
+            const dist = Math.sqrt(distx * distx + disty * disty);
+            const strength = 1 / (dist * dist);
+
+            fieldVec[0] += strength * (distx / dist);
+            fieldVec[1] -= strength * (disty / dist);
+        };
+
+
+        fieldVec[0] *= sensorScale;
+        fieldVec[1] *= sensorScale;
+        sctx.beginPath();
+        sctx.moveTo(sensor[0], 500 - sensor[1]);
+        sctx.lineTo(sensor[0] + (fieldVec[0] || 0), 500 - sensor[1] + (fieldVec[1]) || 0);
+        sctx.strokeStyle = "red";
+        sctx.lineWidth = 5;
+        sctx.stroke();
+    };
+}
+
 function render() {
     gl.uniform1i(protonsNumUniform, protonsLength);
     gl.uniform1i(electronsNumUniform, electronsLength);
@@ -171,6 +223,7 @@ function render() {
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
     drawSubatoms();
+    drawSensors();
 }
 
 var hovering = {
@@ -190,7 +243,7 @@ canvasContainer.addEventListener("mousemove", function (e) {
     var x = e.offsetX;
     var y = 500 - e.offsetY;
 
-    //intersection test to see if any objects are being hovered over
+    //intersection test to see if any objects are being hovered over while not already grabbing an object
     //chooses the closest object
     if (!hovering.grabbing) {
         var obj = "none";
@@ -216,6 +269,16 @@ canvasContainer.addEventListener("mousemove", function (e) {
                 dist = sqdist;
             }
         }
+        for (var i = 0; i < sensorsLength; i++) {
+            const sensor = [sensors[i * 2], sensors[i * 2 + 1]];
+            const diff = [x - sensor[0], y - sensor[1]];
+            const sqdist = (diff[0] * diff[0]) + (diff[1] * diff[1]);
+            if (sqdist < 64 && (sqdist < dist || dist < 0)) {
+                obj = "sensor";
+                index = i;
+                dist = sqdist;
+            }
+        }
         if (obj == "none") {
             canvasContainer.style.cursor = 'default';
             hovering.object = "none";
@@ -229,6 +292,7 @@ canvasContainer.addEventListener("mousemove", function (e) {
         return;
     }
 
+    //if already grabbing, move the corresponding subatomic particle
     if (hovering.object == "electron") {
         if (electronsLength < 1) return;
         electrons[(hovering.index) * 2] = x;
@@ -241,12 +305,20 @@ canvasContainer.addEventListener("mousemove", function (e) {
         protons[(hovering.index) * 2 + 1] = y;
         render();
     }
+    else if (hovering.object == "sensor") {
+        if (sensorsLength < 1) return;
+        sensors[(hovering.index) * 2] = x;
+        sensors[(hovering.index) * 2 + 1] = y;
+        drawSensors();
+    }
 });
 
 
 
 canvasContainer.addEventListener("mousedown", function (e) {
 
+
+    //if you're hovering over an object, grab it instead of creating a new object
     if (hovering.object != "none") {
         hovering.grabbing = true;
         return;
@@ -287,6 +359,18 @@ canvasContainer.addEventListener("mousedown", function (e) {
         hovering.grabbing = true;
         canvasContainer.style.cursor = 'pointer';
         render();
+    }
+    else if (selected == "sensor") {
+        if (sensorsLength >= MAX_SUBATOMS) { console.log("at capacity"); return };
+        sensors[sensorsLength * 2] = x;
+        sensors[sensorsLength * 2 + 1] = y;
+        sensorsLength++;
+
+        hovering.object = "sensor";
+        hovering.index = sensorsLength - 1;
+        hovering.grabbing = true;
+        canvasContainer.style.cursor = 'pointer';
+        drawSensors(); //save a little bit of computation by only having to draw the sensors
     }
 });
 
