@@ -1,6 +1,9 @@
 const MAX_SUBATOMS = 16;
 const sensorScale = 200000;
 
+//This is shader code written in GLSL
+//It's written in a javascript string since it's not javascript code (which makes it much harder to debug)
+//It's then compiled for the actual shaders that are rendered on a square
 const vertexShaderSource = `#version 300 es
 #pragma vscode_glsllint_stage: vert
 
@@ -64,17 +67,20 @@ void main() {
 }
 `
 
+//This begins the fun that is initializing a webgl2 canvas
 const fieldCanvas = document.getElementById("fluxCanvas");
 
 const gl = fieldCanvas.getContext("webgl2");
 gl.enable(gl.BLEND);
 gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
+//check if webgl2 compatible
 if (!gl) {
     alert("webgl2 is not supported in this web browser!");
 }
 const program = gl.createProgram();
 
+//compile the shaders (requires both a vertex and fragment shader)
 const vertexShader = gl.createShader(gl.VERTEX_SHADER);
 gl.shaderSource(vertexShader, vertexShaderSource);
 gl.compileShader(vertexShader);
@@ -85,6 +91,7 @@ gl.shaderSource(fragmentShader, fragmentShaderSource);
 gl.compileShader(fragmentShader);
 gl.attachShader(program, fragmentShader);
 
+//actually use the webgl2 program that was created and check that it worked
 gl.linkProgram(program);
 
 if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
@@ -95,6 +102,7 @@ if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
 gl.useProgram(program);
 
 
+//create a quad that covers the entire screen (coordinates for the corner vertices)
 const quadData = new Float32Array([
     -1, -1,
     1, -1,
@@ -102,6 +110,7 @@ const quadData = new Float32Array([
     1, 1
 ]);
 
+//create a buffer that contains the quad data and bind it to the program
 const arrayVertexBuffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, arrayVertexBuffer);
 gl.bufferData(gl.ARRAY_BUFFER, quadData, gl.STATIC_DRAW);
@@ -112,12 +121,17 @@ gl.vertexAttrib4f(1, 1, 0, 0, 1);
 
 gl.enableVertexAttribArray(0);
 
+//access the uniforms of the glsl program (the variables that can be set from the CPU for the GPU to use)
 const protonsNumUniform = gl.getUniformLocation(program, "numProtons");
 const electronsNumUniform = gl.getUniformLocation(program, "numElectrons");
 const electronsUniform = gl.getUniformLocation(program, "electrons");
 const protonsUniform = gl.getUniformLocation(program, "protons");
 const fluxScaleUniform = gl.getUniformLocation(program, "fluxScale");
 
+//create the data for all of the scene objects
+//  All data is represented as fixed float32Arrays with a corresponding size variable as opposed to the standard variable sized javascript array
+//  This is to allow for the protons and electrons data to be sent to the webgl2 program and processed in the fragment shader
+//  Technically, the sensors array could just be a variable size, but for convention it is also made a fixed array to make all loop structures the same
 var protons = new Float32Array(MAX_SUBATOMS * 2);
 var protonsLength = 0;
 var electrons = new Float32Array(MAX_SUBATOMS * 2);
@@ -126,8 +140,7 @@ var sensors = new Float32Array(MAX_SUBATOMS * 2);
 var sensorsLength = 0;
 
 
-
-
+//initialize the sprites as offscreenCanvases (much faster than drawing the direct image every time)
 const electronImage = new Image();
 const electronCanvas = new OffscreenCanvas(50, 50);
 electronImage.onload = function () { electronCanvas.getContext('2d').drawImage(electronImage, 0, 0, 50, 50); };
@@ -139,9 +152,13 @@ protonImage.onload = function () { protonCanvas.getContext('2d').drawImage(proto
 protonImage.src = "proton.png";
 
 
+//Access the regular 2d canvases
 const canvasContainer = document.getElementById("canvasContainer");
 const subatomCanvas = document.getElementById("subatomCanvas");
 const sensorCanvas = document.getElementById("sensorCanvas");
+//NOTE: the 2d canvases have (0,0) aka the origin as the top left of the image, while the webgl2 canvas has the origin point at the bottom right.
+//  Because of this, the complement of the y-value is used for the 2d canvases (subtracting the y value from the total height of the canvas) in order to get the correct position 
+
 
 if (!subatomCanvas.getContext) {
     alert("canvas context not supported in this browser!");
@@ -150,6 +167,7 @@ if (!subatomCanvas.getContext) {
 const ctx = subatomCanvas.getContext("2d");
 const sctx = sensorCanvas.getContext("2d");
 
+//draw the protons and electrons on a normal 2d canvas (not webgl2)
 function drawSubatoms() {
 
     ctx.clearRect(0, 0, 500, 500);
@@ -166,18 +184,20 @@ function drawSubatoms() {
     }
 }
 
+//draw the sensors on a normal 2d canvas
 function drawSensors() {
 
     sctx.clearRect(0, 0, 500, 500);
-    console.log("eeeee");
 
     for (var u = 0; u < sensorsLength; u++) {
         const sensor = [sensors[u * 2], sensors[u * 2 + 1]];
+        //draw the actual sensor
         sctx.beginPath();
         sctx.arc(sensor[0], 500 - sensor[1], 8, 0, 2 * Math.PI);
         sctx.fillStyle = "#eda655";
         sctx.fill();
 
+        //begin field calculation
         var fieldVec = [0, 0];
 
         for (var i = 0; i < protonsLength; i++) {
@@ -205,6 +225,7 @@ function drawSensors() {
 
         fieldVec[0] *= sensorScale;
         fieldVec[1] *= sensorScale;
+        //draw a line representing the vector
         sctx.beginPath();
         sctx.moveTo(sensor[0], 500 - sensor[1]);
         sctx.lineTo(sensor[0] + (fieldVec[0] || 0), 500 - sensor[1] + (fieldVec[1]) || 0);
@@ -214,24 +235,29 @@ function drawSensors() {
     };
 }
 
+//render function
 function render() {
+    //set all of the corresponding uniforms on the webgl2 program
     gl.uniform1i(protonsNumUniform, protonsLength);
     gl.uniform1i(electronsNumUniform, electronsLength);
     gl.uniform2fv(electronsUniform, electrons);
     gl.uniform2fv(protonsUniform, protons);
 
+    //draw the quad
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
     drawSubatoms();
     drawSensors();
 }
 
+//data containing which object the cursor is currently hovering over and whether or not they are actually grabbing it
 var hovering = {
     object: "none",
     index: 0,
     grabbing: false,
 }
 
+//both mouseup and mouseleave unset the current hovered object 
 canvasContainer.addEventListener("mouseup", function (e) {
     hovering.grabbing = false;
     hovering.object = "none";
@@ -255,6 +281,8 @@ canvasContainer.addEventListener("mousemove", function (e) {
         var obj = "none";
         var index = -1;
         var dist = -1.0;
+        //instead of finding the actual distance between the cursor and every object, just use the square to save computation time and ignore a square root
+        //  Note: in order to tell if it's within the radius of each object then, you have to square the radius of each object in the if statement
         for (var i = 0; i < electronsLength; i++) {
             const electron = [electrons[i * 2], electrons[i * 2 + 1]];
             const diff = [x - electron[0], y - electron[1]];
@@ -323,7 +351,6 @@ canvasContainer.addEventListener("mousemove", function (e) {
 
 canvasContainer.addEventListener("mousedown", function (e) {
 
-
     //if you're hovering over an object, grab it instead of creating a new object
     if (hovering.object != "none") {
         hovering.grabbing = true;
@@ -342,6 +369,7 @@ canvasContainer.addEventListener("mousedown", function (e) {
         }
     }
 
+    //append the corresponding object data to its respective data array, and then increase the total count of objects in that array
     if (selected == "electron") {
         if (electronsLength >= MAX_SUBATOMS) { console.log("at capacity"); return };
         electrons[electronsLength * 2] = x;
@@ -380,7 +408,7 @@ canvasContainer.addEventListener("mousedown", function (e) {
     }
 });
 
-
+//initialize the flux scale and then let the range slider control it
 gl.uniform1f(fluxScaleUniform, document.getElementById("fluxScale").value);
 function setScale() {
     gl.uniform1f(fluxScaleUniform, document.getElementById("fluxScale").value);
