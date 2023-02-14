@@ -55,7 +55,11 @@ void main() {
     
     float finalStrength = length(fieldVec);
 
-    fragColor = vec4(scaleToRGB(fieldVec.x/finalStrength), scaleToRGB(fieldVec.y/finalStrength), 1, finalStrength * fluxScale);
+    float val1 = scaleToRGB(fieldVec.x/finalStrength);
+    float val2 = scaleToRGB(fieldVec.y/finalStrength);
+    float val3 = 1.0 - length(vec2(val1,val2));
+
+    fragColor = vec4(val1, val2, 1, finalStrength * fluxScale);
 }
 `
 
@@ -131,6 +135,8 @@ const protonCanvas = new OffscreenCanvas(50, 50);
 protonImage.onload = function () { protonCanvas.getContext('2d').drawImage(protonImage, 0, 0, 50, 50); };
 protonImage.src = "proton.png";
 
+
+const canvasContainer = document.getElementById("canvasContainer");
 const subatomCanvas = document.getElementById("subatomCanvas");
 
 if (!subatomCanvas.getContext) {
@@ -173,14 +179,14 @@ var hovering = {
     grabbing: false,
 }
 
-document.getElementById("canvasContainer").addEventListener("mouseup", function (e) {
+canvasContainer.addEventListener("mouseup", function (e) {
     hovering.grabbing = false;
     hovering.object = "none";
     hovering.index = -1;
 });
 
 
-document.getElementById("canvasContainer").addEventListener("mousemove", function (e) {
+canvasContainer.addEventListener("mousemove", function (e) {
     var x = e.offsetX;
     var y = 500 - e.offsetY;
 
@@ -191,7 +197,7 @@ document.getElementById("canvasContainer").addEventListener("mousemove", functio
         var index = -1;
         var dist = -1.0;
         for (var i = 0; i < electronsLength; i++) {
-            const electron = [electrons[i * 2], electrons[(i * 2) + 1]];
+            const electron = [electrons[i * 2], electrons[i * 2 + 1]];
             const diff = [x - electron[0], y - electron[1]];
             const sqdist = (diff[0] * diff[0]) + (diff[1] * diff[1]);
             if (sqdist < 625 && (sqdist < dist || dist < 0)) {
@@ -202,20 +208,21 @@ document.getElementById("canvasContainer").addEventListener("mousemove", functio
         }
         for (var i = 0; i < protonsLength; i++) {
             const proton = [protons[i * 2], protons[i * 2 + 1]];
-            const sqdist = proton[0] * proton[0] + proton[1] * proton[1]
-            if (sqdist < 625 && (sqdist < dist || obj == "none")) {
+            const diff = [x - proton[0], y - proton[1]];
+            const sqdist = (diff[0] * diff[0]) + (diff[1] * diff[1]);
+            if (sqdist < 625 && (sqdist < dist || dist < 0)) {
                 obj = "proton";
                 index = i;
                 dist = sqdist;
             }
         }
         if (obj == "none") {
-            document.getElementById("canvasContainer").style.cursor = 'default';
+            canvasContainer.style.cursor = 'default';
             hovering.object = "none";
             hovering.index = -1;
         }
         else {
-            document.getElementById("canvasContainer").style.cursor = 'pointer';
+            canvasContainer.style.cursor = 'pointer';
             hovering.object = obj;
             hovering.index = index;
         }
@@ -238,7 +245,7 @@ document.getElementById("canvasContainer").addEventListener("mousemove", functio
 
 
 
-document.getElementById("canvasContainer").addEventListener("mousedown", function (e) {
+canvasContainer.addEventListener("mousedown", function (e) {
 
     if (hovering.object != "none") {
         hovering.grabbing = true;
@@ -264,8 +271,9 @@ document.getElementById("canvasContainer").addEventListener("mousedown", functio
         electronsLength++;
 
         hovering.object = "electron";
-        hovering.index = electronsLength;
+        hovering.index = electronsLength - 1;
         hovering.grabbing = true;
+        canvasContainer.style.cursor = 'pointer';
         render();
     }
     else if (selected == "proton") {
@@ -275,8 +283,9 @@ document.getElementById("canvasContainer").addEventListener("mousedown", functio
         protonsLength++;
 
         hovering.object = "proton";
-        hovering.index = protonsLength;
+        hovering.index = protonsLength - 1;
         hovering.grabbing = true;
+        canvasContainer.style.cursor = 'pointer';
         render();
     }
 });
