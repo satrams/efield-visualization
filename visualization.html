@@ -3,8 +3,10 @@
 
 <body style="background-color:#000000">
     <div id="canvasContainer">
-        <canvas id="subatomCanvas" width="500" height="500" style="position:absolute; top: 8px; left: 8px; border:1px solid aliceblue"></canvas>
-        <canvas id="sensorCanvas" width="500" height="500" style="position:absolute; top: 8px; left: 8px; border:1px solid aliceblue"></canvas>
+        <canvas id="subatomCanvas" width="500" height="500"
+            style="position:absolute; top: 8px; left: 8px; border:1px solid aliceblue"></canvas>
+        <canvas id="sensorCanvas" width="500" height="500"
+            style="position:absolute; top: 8px; left: 8px; border:1px solid aliceblue"></canvas>
         <canvas id="fluxCanvas" width="500" height="500" style="border:1px solid aliceblue"></canvas>
     </div>
     <div style="color:aliceblue">
@@ -61,7 +63,7 @@
 
         const ctx = subatomCanvas.getContext("2d");
 
-        ctx.clearRect(0,0,500,500);
+        ctx.clearRect(0, 0, 500, 500);
 
         electrons.forEach(electron => {
             //console.log(electrons[electron]);
@@ -82,7 +84,7 @@
 
         const ctx = sensorCanvas.getContext("2d");
 
-        ctx.clearRect(0,0,500,500);
+        ctx.clearRect(0, 0, 500, 500);
 
         sensors.forEach(sensor => {
             ctx.beginPath();
@@ -135,7 +137,7 @@
         var fieldVec;
         for (var y = 0; y < 500; y++) {
             for (var x = 0; x < 500; x++) {
-                fieldVec = [0,0];
+                fieldVec = [0, 0];
                 protons.forEach(proton => {
                     const distx = x - proton[0];
                     const disty = y - proton[1];
@@ -155,7 +157,7 @@
                     fieldVec[0] -= strength * (distx / dist);
                     fieldVec[1] -= strength * (disty / dist);
                 });
-                
+
                 const finalStrength = Math.sqrt(fieldVec[0] * fieldVec[0] + fieldVec[1] * fieldVec[1]);
 
                 const ptr = (x + y * 500) * 4;
