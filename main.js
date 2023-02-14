@@ -167,35 +167,84 @@ function render() {
     drawSubatoms();
 }
 
+var hovering = {
+    object: "none",
+    index: 0,
+    grabbing: false,
+}
+
+document.getElementById("canvasContainer").addEventListener("mouseup", function (e) {
+    hovering.grabbing = false;
+    hovering.object = "none";
+    hovering.index = -1;
+});
+
+
 document.getElementById("canvasContainer").addEventListener("mousemove", function (e) {
     var x = e.offsetX;
     var y = 500 - e.offsetY;
 
-    //get which object is currently selected to place
-    var options = document.getElementsByName('object');
-    var selected;
-    for (var i = 0; i < options.length; i++) {
-        if (options[i].checked) {
-            selected = options[i].value;
+    //intersection test to see if any objects are being hovered over
+    //chooses the closest object
+    if (!hovering.grabbing) {
+        var obj = "none";
+        var index = -1;
+        var dist = -1.0;
+        for (var i = 0; i < electronsLength; i++) {
+            const electron = [electrons[i * 2], electrons[(i * 2) + 1]];
+            const diff = [x - electron[0], y - electron[1]];
+            const sqdist = (diff[0] * diff[0]) + (diff[1] * diff[1]);
+            if (sqdist < 625 && (sqdist < dist || dist < 0)) {
+                obj = "electron";
+                index = i;
+                dist = sqdist;
+            }
         }
+        for (var i = 0; i < protonsLength; i++) {
+            const proton = [protons[i * 2], protons[i * 2 + 1]];
+            const sqdist = proton[0] * proton[0] + proton[1] * proton[1]
+            if (sqdist < 625 && (sqdist < dist || obj == "none")) {
+                obj = "proton";
+                index = i;
+                dist = sqdist;
+            }
+        }
+        if (obj == "none") {
+            document.getElementById("canvasContainer").style.cursor = 'default';
+            hovering.object = "none";
+            hovering.index = -1;
+        }
+        else {
+            document.getElementById("canvasContainer").style.cursor = 'pointer';
+            hovering.object = obj;
+            hovering.index = index;
+        }
+        return;
     }
 
-
-    if (selected == "electron") {
+    if (hovering.object == "electron") {
         if (electronsLength < 1) return;
-        electrons[(electronsLength - 1) * 2] = x;
-        electrons[(electronsLength - 1) * 2 + 1] = y;
+        electrons[(hovering.index) * 2] = x;
+        electrons[(hovering.index) * 2 + 1] = y;
         render();
     }
-    else if (selected == "proton") {
+    else if (hovering.object == "proton") {
         if (protonsLength < 1) return;
-        protons[(protonsLength - 1) * 2] = x;
-        protons[(protonsLength - 1) * 2 + 1] = y;
+        protons[(hovering.index) * 2] = x;
+        protons[(hovering.index) * 2 + 1] = y;
         render();
     }
 });
 
-document.getElementById("canvasContainer").addEventListener("click", function (e) {
+
+
+document.getElementById("canvasContainer").addEventListener("mousedown", function (e) {
+
+    if (hovering.object != "none") {
+        hovering.grabbing = true;
+        return;
+    }
+
     var x = e.offsetX;
     var y = 500 - e.offsetY;
 
@@ -213,6 +262,10 @@ document.getElementById("canvasContainer").addEventListener("click", function (e
         electrons[electronsLength * 2] = x;
         electrons[electronsLength * 2 + 1] = y;
         electronsLength++;
+
+        hovering.object = "electron";
+        hovering.index = electronsLength;
+        hovering.grabbing = true;
         render();
     }
     else if (selected == "proton") {
@@ -220,6 +273,10 @@ document.getElementById("canvasContainer").addEventListener("click", function (e
         protons[protonsLength * 2] = x;
         protons[protonsLength * 2 + 1] = y;
         protonsLength++;
+
+        hovering.object = "proton";
+        hovering.index = protonsLength;
+        hovering.grabbing = true;
         render();
     }
 });
