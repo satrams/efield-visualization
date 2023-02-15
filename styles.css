@@ -1,0 +1,14 @@
+:root {
+    --background-color-light: #2B2D42;
+    --background-color-dark: #000000;
+    --main-color-light: aliceblue;
+    --text-color: var(--main-color-light);
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    position:relative;
+    text-align:center;
+    color: var(--text-color);
+    background-color: var(--background-color-light);
+}
