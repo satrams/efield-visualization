@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<body style="background-color:#000000">
+    <div id="canvasContainer" style="width: 500px">
+        <canvas id="subatomCanvas" width="500" height="500"
+            style="position:absolute; top: 8px; left: 8px; border:1px solid aliceblue"></canvas>
+        <canvas id="sensorCanvas" width="500" height="500"
+            style="position:absolute; top: 8px; left: 8px; border:1px solid aliceblue"></canvas>
+        <canvas id="fluxCanvas" width="500" height="500" style="border:1px solid aliceblue"></canvas>
+    </div>
+    <div style="color:aliceblue">
+        <input type="radio" id="electron" name="object" value="electron">
+        <label for="electron">electron</label>
+        <input type="radio" id="proton" name="object" value="proton">
+        <label for="proton">proton</label>
+        <input type="radio" id="sensor" name="object" value="sensor">
+        <label for="sensor">sensor</label>
+    </div>
+    <div style="color:aliceblue">
+        <label for="fluxScale">fluxScale</label>
+        <input type="range" min="1000" max="10000" value="5000" id="fluxScale" oninput="setScale()">
+    </div>
+</body>
+
+<script src="main.js"></script>
