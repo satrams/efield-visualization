@@ -200,6 +200,7 @@ function drawSensors() {
         //begin field calculation
         var fieldVec = [0, 0];
 
+        //iterate over all protons and electrons and add their respective field force
         for (var i = 0; i < protonsLength; i++) {
             const proton = [protons[i * 2], protons[i * 2 + 1]];
             const distx = sensor[0] - proton[0];
@@ -207,8 +208,8 @@ function drawSensors() {
             const dist = Math.sqrt(distx * distx + disty * disty);
             const strength = 1 / (dist * dist);
 
-            fieldVec[0] -= strength * (distx / dist);
-            fieldVec[1] += strength * (disty / dist);
+            fieldVec[0] += strength * (distx / dist); 
+            fieldVec[1] -= strength * (disty / dist); //we have to subtract here when we would otherwise just add because of the strange conversion between top left origin point for 2d canvases and bottom left origin point for webgl2 canvases
         };
 
         for (var i = 0; i < electronsLength; i++) {
@@ -218,11 +219,11 @@ function drawSensors() {
             const dist = Math.sqrt(distx * distx + disty * disty);
             const strength = 1 / (dist * dist);
 
-            fieldVec[0] += strength * (distx / dist);
-            fieldVec[1] -= strength * (disty / dist);
+            fieldVec[0] -= strength * (distx / dist); //equivalent to cos(angle) * strength because cos(angle) = distx/dist
+            fieldVec[1] += strength * (disty / dist); //equivalent to sin(angle) * strength because sin(angle) = disty/dist
         };
 
-
+        //arbitrary scale just so a line actually shows up
         fieldVec[0] *= sensorScale;
         fieldVec[1] *= sensorScale;
         //draw a line representing the vector
@@ -264,8 +265,35 @@ canvasContainer.addEventListener("mouseup", function (e) {
     hovering.index = -1;
 });
 
+function removeFromVecArray(array, totalLength, index) {
+    if (index == totalLength-1) {
+        array[index * 2] = 0;
+        array[index * 2 + 1] = 0;
+        return;
+    }
+    for (var i = index+1; i < totalLength; i++) {
+        array[(i-1) * 2] = array[i * 2];
+        array[(i-1) * 2 + 1] = array[i *2 + 1];
+    }
+}
 
 canvasContainer.addEventListener("mouseleave", function (e) {
+    if (hovering.grabbing && hovering.obj != "none") {
+        if (hovering.object == "electron") {
+            removeFromVecArray(electrons, electronsLength, hovering.index);
+            electronsLength--;
+        }
+        else if (hovering.object == "proton") {
+            removeFromVecArray(protons, protonsLength, hovering.index);
+            protonsLength--;
+        }
+        else if (hovering.object == "sensor") {
+            removeFromVecArray(sensors, sensorsLength, hovering.index);
+            sensorsLength--;
+        }
+        render();
+    }
+
     hovering.grabbing = false;
     hovering.object = "none";
     hovering.index = -1;
