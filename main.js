@@ -4,6 +4,12 @@ const sensorScale = 200000;
 //This is shader code written in GLSL
 //It's written in a javascript string since it's not javascript code (which makes it much harder to debug)
 //It's then compiled for the actual shaders that are rendered on a square
+//The shader program works as follows:
+//  The program calculates the net electric field vector at any given pixel's position and then assigns it a color based on the following parameters
+//      RGB colors scheme where:
+//      R is the x unit value
+//      G is the y unit value
+//      B is a special calculation done to make the colors look pretty. Basically just subtract the average of the R and B values from 1 and then multiply by a weight
 const vertexShaderSource = `#version 300 es
 #pragma vscode_glsllint_stage: vert
 
@@ -19,6 +25,7 @@ const fragmentShaderSource = `#version 300 es
 #define WIDTH 500.0
 #define HEIGHT 500.0
 #define MAX_SUBATOMS ${MAX_SUBATOMS}
+#define WEIGHT 1.75
 
 precision mediump float;
 
@@ -61,9 +68,9 @@ void main() {
 
     float val1 = scaleToRGB(fieldVec.x/finalStrength);
     float val2 = scaleToRGB(fieldVec.y/finalStrength);
-    float val3 = 1.0 - length(vec2(val1,val2));
+    float val3 = 1.0 - (val1 + val2)/(2.0 * WEIGHT);
 
-    fragColor = vec4(val1, val2, 1, finalStrength * fluxScale);
+    fragColor = vec4(val1, val2, val3, finalStrength * fluxScale);
 }
 `
 
