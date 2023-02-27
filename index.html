@@ -10,7 +10,7 @@
         <h1>Electric Field Visualization</h1>
         <h2>Select what to place and click inside the canvas to place it!</h2>
         <div id="canvasContainer" style="margin: 10px auto; position: relative; display:inline-block; height: 500px; width: 500px; background-color: var(--background-color-dark)">
-            <canvas id="fluxCanvas" width="500" height="500" style="position: absolute; top: 0px; left: 0px; border:1px solid var(--main-color-light)"></canvas>
+            <canvas id="fieldCanvas" width="500" height="500" style="position: absolute; top: 0px; left: 0px; border:1px solid var(--main-color-light)"></canvas>
             <canvas id="subatomCanvas" width="500" height="500"
                 style="position:absolute; top: 0px; left: 0px; border:1px solid var(--main-color-light)"></canvas>
             <canvas id="sensorCanvas" width="500" height="500"
@@ -26,8 +26,8 @@
                 <label for="sensor">sensor</label>
             </div>
             <div style="display: inline-flex; margin: 0px auto; vertical-align:middle; text-align: center; align-items:center; justify-content: center;">
-                <label for="fluxScale">fluxScale</label>
-                <input style="margin-left:10px" type="range" min="1000" max="10000" value="5000" id="fluxScale" oninput="setScale()">
+                <label for="Field Scale">fieldScale</label>
+                <input style="margin-left:10px" type="range" min="1000" max="10000" value="5000" id="fieldScale" oninput="setScale()">
             </div>
         </div>
         <h2>Color Denotes Direction!</h2>

@@ -33,7 +33,7 @@ uniform int numProtons;
 uniform int numElectrons;
 uniform vec2[MAX_SUBATOMS] protons;
 uniform vec2[MAX_SUBATOMS] electrons;
-uniform float fluxScale;
+uniform float fieldScale;
 
 out vec4 fragColor;
 
@@ -70,12 +70,12 @@ void main() {
     float val2 = scaleToRGB(fieldVec.y/finalStrength);
     float val3 = 1.0 - (val1 + val2)/(2.0 * WEIGHT);
 
-    fragColor = vec4(val1, val2, val3, finalStrength * fluxScale);
+    fragColor = vec4(val1, val2, val3, finalStrength * fieldScale);
 }
 `
 
 //This begins the fun that is initializing a webgl2 canvas
-const fieldCanvas = document.getElementById("fluxCanvas");
+const fieldCanvas = document.getElementById("fieldCanvas");
 
 const gl = fieldCanvas.getContext("webgl2");
 gl.enable(gl.BLEND);
@@ -133,7 +133,7 @@ const protonsNumUniform = gl.getUniformLocation(program, "numProtons");
 const electronsNumUniform = gl.getUniformLocation(program, "numElectrons");
 const electronsUniform = gl.getUniformLocation(program, "electrons");
 const protonsUniform = gl.getUniformLocation(program, "protons");
-const fluxScaleUniform = gl.getUniformLocation(program, "fluxScale");
+const fieldScaleUniform = gl.getUniformLocation(program, "fieldScale");
 
 //create the data for all of the scene objects
 //  All data is represented as fixed float32Arrays with a corresponding size variable as opposed to the standard variable sized javascript array
@@ -443,10 +443,10 @@ canvasContainer.addEventListener("mousedown", function (e) {
     }
 });
 
-//initialize the flux scale and then let the range slider control it
-gl.uniform1f(fluxScaleUniform, document.getElementById("fluxScale").value);
+//initialize the field scale and then let the range slider control it
+gl.uniform1f(fieldScaleUniform, document.getElementById("fieldScale").value);
 function setScale() {
-    gl.uniform1f(fluxScaleUniform, document.getElementById("fluxScale").value);
+    gl.uniform1f(fieldScaleUniform, document.getElementById("fieldScale").value);
     render();
 }
 
