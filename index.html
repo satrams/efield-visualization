@@ -25,11 +25,14 @@
                 <input type="radio" id="sensor" name="object" value="sensor">
                 <label for="sensor">sensor</label>
             </div>
-            <div style="display: inline-block; height: 100px; vertical-align:middle">
+            <div style="display: inline-block; margin: 0px auto; vertical-align:middle">
                 <label for="fluxScale">fluxScale</label>
                 <input type="range" min="1000" max="10000" value="5000" id="fluxScale" oninput="setScale()">
             </div>
         </div>
+        <h2>Color Denotes Direction!</h2>
+        <p>In this visualization, the colors shown actually show the direction of the field at any given point, and the transparency of the color shows the strength. While this can be confusing at first, such a method of showing direction and magnitude demonstrates how electric fields are *continuous* fields (as opposed to the traditional vector field visualization).</p>
+        <p>Below is a helpful image that will help with undertsanding what color means what direction: </p>
     </div>
 </body>
 
