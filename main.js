@@ -25,7 +25,7 @@ const fragmentShaderSource = `#version 300 es
 #define WIDTH 500.0
 #define HEIGHT 500.0
 #define MAX_SUBATOMS ${MAX_SUBATOMS}
-#define WEIGHT 1.75
+#define WEIGHT 2.0
 
 precision mediump float;
 
