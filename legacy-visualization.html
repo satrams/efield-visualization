@@ -1,26 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
+    <link rel="stylesheet" href="styles.css">
+</head>
 
-<body style="background-color:#000000">
-    <div id="canvasContainer">
+<body>
+    <h1>Legacy Electric Field Visualization</h1>
+    <h2>Select what to place and click inside the canvas to place it!</h2>
+    <div id="canvasContainer" style="margin: 10px auto; position: relative; display:inline-block; height: 500px; width: 500px; background-color: var(--background-color-dark)">
+        <canvas id="fluxCanvas" width="500" height="500" style="position: absolute; top: 0px; left: 0px; border:1px solid var(--main-color-light)"></canvas>
         <canvas id="subatomCanvas" width="500" height="500"
-            style="position:absolute; top: 8px; left: 8px; border:1px solid aliceblue"></canvas>
+            style="position:absolute; top: 0px; left: 0px; border:1px solid var(--main-color-light)"></canvas>
         <canvas id="sensorCanvas" width="500" height="500"
-            style="position:absolute; top: 8px; left: 8px; border:1px solid aliceblue"></canvas>
-        <canvas id="fluxCanvas" width="500" height="500" style="border:1px solid aliceblue"></canvas>
+            style="position:absolute; top: 0px; left: 0px; border:1px solid var(--main-color-light)"></canvas>
     </div>
-    <div style="color:aliceblue">
-        <input type="radio" id="electron" name="object" value="electron">
-        <label for="electron">electron</label>
-        <input type="radio" id="proton" name="object" value="proton">
-        <label for="proton">proton</label>
-        <input type="radio" id="sensor" name="object" value="sensor">
-        <label for="sensor">sensor</label>
+    <div style="margin: 10px auto; display:inline">
+        <div>
+            <input type="radio" id="electron" name="object" value="electron">
+            <label for="electron">electron</label>
+            <input type="radio" id="proton" name="object" value="proton">
+            <label for="proton">proton</label>
+            <input type="radio" id="sensor" name="object" value="sensor">
+            <label for="sensor">sensor</label>
+        </div>
+        <div style="display: inline-flex; margin: 0px auto; vertical-align:middle; text-align: center; align-items:center; justify-content: center;">
+            <label for="fluxScale">fieldScale</label>
+            <input style="margin-left:10px" type="range" min="50000" max="2000000" value="500000" id="fluxScale" onchange="setScale()">
+        </div>
     </div>
-    <div style="color:aliceblue">
-        <label for="fluxScale">fluxScale</label>
-        <input type="range" min="50000" max="2000000" value="500000" id="fluxScale" onchange="setScale()">
-    </div>
+    <h2>NOTE: Legacy version!</h2>
+    <span>This is an unoptimized (and very slow) version of this project. If you are able to run the newer version of this project, access it at the default page: </span><a style="background-color: rgba(255, 255, 255, 0.132)" href="https://satrams.github.io/efield-visualization">Current version</a><span>. Otherwise, continue enjoying this older version of the project?</span>
 </body>
 
 
@@ -192,8 +201,8 @@
             }
         }
 
-        var x = e.pageX - fieldCanvas.offsetLeft;
-        var y = e.pageY - fieldCanvas.offsetTop;
+        var x = e.offsetX;
+        var y = e.offsetY;
         if (selected == "electron") {
 
             electrons[electrons.length] = [x, y];
