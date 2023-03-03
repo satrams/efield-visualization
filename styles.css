@@ -16,6 +16,18 @@ body {
     background-color: var(--background-color-light);
 }
 
+button {
+  background-color: var(--highlight-color);
+  border-color: var(--main-color-light);
+  color: var(--main-color-light);
+  border-radius: 6px;
+  margin-top: 5%;
+  margin-left:auto;
+  margin-right:auto;
+  width:35%;
+  height:30%;
+}
+
 input[type='radio'] {
     appearance:none;
     

@@ -16,18 +16,21 @@
             <canvas id="sensorCanvas" width="500" height="500"
                 style="position:absolute; top: 0px; left: 0px; border:1px solid var(--main-color-light)"></canvas>
         </div>
-        <div style="margin: 10px auto; display:inline">
-            <div>
-                <input type="radio" id="electron" name="object" value="electron">
-                <label for="electron">electron</label>
-                <input type="radio" id="proton" name="object" value="proton">
-                <label for="proton">proton</label>
-                <input type="radio" id="sensor" name="object" value="sensor">
-                <label for="sensor">sensor</label>
-            </div>
-            <div style="display: inline-flex; margin: 0px auto; vertical-align:middle; text-align: center; align-items:center; justify-content: center;">
-                <label for="Field Scale">fieldScale</label>
-                <input style="margin-left:10px" type="range" min="1000" max="10000" value="5000" id="fieldScale" oninput="setScale()">
+        <div>
+            <div style="margin: 10px auto; display:inline-flex; flex-direction: column; vertical-align:middle;">
+                <div>
+                    <input type="radio" id="electron" name="object" value="electron">
+                    <label for="electron">electron</label>
+                    <input type="radio" id="proton" name="object" value="proton">
+                    <label for="proton">proton</label>
+                    <input type="radio" id="sensor" name="object" value="sensor">
+                    <label for="sensor">sensor</label>
+                </div>
+                <div style="display: inline-flex; margin: 0px auto; vertical-align:middle; text-align: center; align-items:center; justify-content: center;">
+                    <label for="Field Scale">fieldScale</label>
+                    <input style="margin-left:10px" type="range" min="1000" max="10000" value="5000" id="fieldScale" oninput="setScale()">
+                </div>
+                <button onclick="clearAll()">Clear All</button>
             </div>
         </div>
         <h2>Color Denotes Direction!</h2>

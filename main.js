@@ -450,3 +450,9 @@ function setScale() {
     render();
 }
 
+function clearAll() {
+    electronsLength = 0;
+    protonsLength = 0;
+    sensorsLength = 0;
+    render();
+}
