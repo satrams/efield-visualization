@@ -3,6 +3,7 @@
     --background-color-dark: #000000;
     --main-color-light: aliceblue;
     --highlight-color: #DE4D86;
+    --highlight-color-hovered: #bb4172;
     --text-color: var(--main-color-light);
 }
 
@@ -18,14 +19,21 @@ body {
 
 button {
   background-color: var(--highlight-color);
-  border-color: var(--main-color-light);
+  border-style:none;
   color: var(--main-color-light);
-  border-radius: 6px;
-  margin-top: 5%;
-  margin-left:auto;
-  margin-right:auto;
-  width:35%;
-  height:30%;
+  border-radius: 50px;
+  padding: 8px 10px;
+  transition: 0.1s all ease-in-out;
+  font-size: 80%
+}
+
+button:hover {
+  cursor:pointer;
+  font-size: 90%;
+}
+
+button:active {
+  background-color: var(--highlight-color-hovered);
 }
 
 input[type='radio'] {

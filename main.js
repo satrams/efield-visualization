@@ -451,6 +451,7 @@ function setScale() {
 }
 
 function clearAll() {
+    //We don't need to clear the data. It will just get overrwritten
     electronsLength = 0;
     protonsLength = 0;
     sensorsLength = 0;
