@@ -24,12 +24,12 @@ button {
   border-radius: 50px;
   padding: 8px 10px;
   transition: 0.1s all ease-in-out;
-  font-size: 80%
+  font-size: 14px;
 }
 
 button:hover {
   cursor:pointer;
-  font-size: 90%;
+  font-size: 17px;
 }
 
 button:active {
